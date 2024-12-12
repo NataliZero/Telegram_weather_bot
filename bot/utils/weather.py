@@ -1,30 +1,24 @@
 import requests
-from bs4 import BeautifulSoup
 
-def get_weather():
-    url = "https://www.gismeteo.ru/weather-sankt-peterburg-4079/"  # URL страницы с погодой
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
-    response = requests.get(url, headers=headers)
+API_KEY = "cb81feb613e66e7f352fd2fc8db991cd"  # Ваш API-ключ
+BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, "html.parser")
+def get_weather(city="Санкт-Петербург"):
+    """
+    Получение данных о погоде для указанного города.
+    """
+    try:
+        # Формируем запрос
+        url = f"{BASE_URL}?q={city}&appid={API_KEY}&units=metric&lang=ru"
+        response = requests.get(url)
+        data = response.json()
 
-        # Получаем температуру из элемента <span> с классом "temperature-value"
-        temperature_tag = soup.find("span", class_="temperature-value")
-        if temperature_tag:
-            temperature = temperature_tag.text.strip()
+        # Проверяем статус ответа
+        if response.status_code == 200:
+            temperature = data["main"]["temp"]
+            weather_description = data["weather"][0]["description"]
+            return f"Погода в {city}:\nТемпература: {temperature}°C\nОписание: {weather_description.capitalize()}"
         else:
-            temperature = "Температура не найдена"
-
-        # Получаем состояние погоды (например, описание) — это нужно искать по подходящему тегу
-        # Пример поиска для описания состояния погоды, скорее всего, нужно будет уточнить:
-        condition_tag = soup.find("div", class_="widget-now")  # Поищите класс для описания погоды
-        condition = condition_tag.text.strip() if condition_tag else "Состояние погоды не найдено"
-
-        result = f"Температура: {temperature}, Погода: {condition}"
-        print(result)  # Выводим результат в консоль
-        return result
-    else:
-        return "Не удалось получить данные о погоде."
+            return f"Ошибка: {data.get('message', 'Не удалось получить данные о погоде.')}"
+    except Exception as e:
+        return f"Произошла ошибка: {e}"

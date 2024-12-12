@@ -1,8 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from bot.config import BOT_TOKEN
-from bot.handlers.commands import router  # Импортируем роутер
+from bot.config import BOT_TOKEN  # Импорт токена из файла config.py
+from bot.handlers.commands import router  # Импорт роутера из handlers.commands
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
